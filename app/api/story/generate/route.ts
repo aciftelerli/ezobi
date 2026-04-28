@@ -38,9 +38,9 @@ BAŞLIK: [masal başlığı]
 [masal metni]`;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 1200,
+      max_tokens: 800,
       temperature: 0.85,
     });
 
