@@ -74,12 +74,8 @@ async function handleGenerate() {
     if (!res.ok) throw new Error("Hata");
     const result = await res.json();
     toast.success("Masal hazir!", { id: "generate" });
-    const params = new URLSearchParams({
-      title: result.title,
-      content: result.content,
-      childName: result.childName,
-    });
-    router.push(`/story/${result.id}?${params.toString()}`);
+    localStorage.setItem("ezobi_story", JSON.stringify(result));
+    router.push(`/story/${result.id}`);
   } catch {
     toast.error("Bir hata olustu.", { id: "generate" });
     setLoading(false);
