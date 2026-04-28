@@ -62,18 +62,29 @@ export default function WizardPage() {
     return true;
   }
 
-  async function handleGenerate() {
-    setLoading(true);
-    toast.loading("Masal yaziliyor...", { id: "generate" });
-    try {
-      await new Promise(r => setTimeout(r, 2000));
-      toast.success("Masal hazir!", { id: "generate" });
-      router.push(`/story/${id}`);
-    } catch {
-      toast.error("Bir hata olustu.", { id: "generate" });
-      setLoading(false);
-    }
+async function handleGenerate() {
+  setLoading(true);
+  toast.loading("Masal yaziliyor...", { id: "generate" });
+  try {
+    const res = await fetch("/api/story/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Hata");
+    const result = await res.json();
+    toast.success("Masal hazir!", { id: "generate" });
+    const params = new URLSearchParams({
+      title: result.title,
+      content: result.content,
+      childName: result.childName,
+    });
+    router.push(`/story/${result.id}?${params.toString()}`);
+  } catch {
+    toast.error("Bir hata olustu.", { id: "generate" });
+    setLoading(false);
   }
+}
 
   const chipStyle = (selected: boolean, color = "#0EA5E9", lightBg = "#EFF6FF", lightColor = "#0284C7") => ({
     padding: "9px 18px", borderRadius: 999, fontFamily: "inherit",
