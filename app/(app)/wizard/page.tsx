@@ -68,7 +68,7 @@ export default function WizardPage() {
     try {
       await new Promise(r => setTimeout(r, 2000));
       toast.success("Masal hazir!", { id: "generate" });
-      router.push("/dashboard");
+      router.push(`/story/${id}`);
     } catch {
       toast.error("Bir hata olustu.", { id: "generate" });
       setLoading(false);
