@@ -1750,3 +1750,362 @@ textarea.wizard-input {
     flex: 1;
   }
 }
+
+/* Storimini library and reader */
+.library-shell,
+.reader-shell {
+  min-height: 100vh;
+  background: #F3F5ED;
+  color: #231C1E;
+}
+
+.library-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 clamp(1rem, 4vw, 2rem);
+  border-bottom: 1px solid rgba(35, 28, 30, .1);
+  background: rgba(243, 245, 237, .92);
+  backdrop-filter: blur(14px);
+}
+
+.library-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+}
+
+.storimini-button.small,
+.secondary-button.small {
+  min-height: 38px;
+  padding: .55rem .78rem;
+  text-decoration: none;
+}
+
+.library-main {
+  width: min(100% - 2rem, 1040px);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 4vw, 3rem) 0;
+}
+
+.library-header {
+  margin-bottom: 1.7rem;
+}
+
+.library-header h1 {
+  margin: 0;
+  color: #231C1E;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.08;
+}
+
+.library-header p:not(.auth-kicker) {
+  margin: .55rem 0 0;
+  color: rgba(35, 28, 30, .66);
+  font-size: .94rem;
+}
+
+.story-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.story-skeleton,
+.story-card,
+.empty-library,
+.reader-card {
+  border: 1px solid rgba(35, 28, 30, .1);
+  border-radius: 8px;
+  background: #fffdf7;
+  box-shadow: 0 12px 30px rgba(35, 28, 30, .08);
+}
+
+.story-skeleton {
+  min-height: 178px;
+  opacity: .58;
+  background: linear-gradient(90deg, rgba(255,255,255,.5), rgba(35,28,30,.08), rgba(255,255,255,.5));
+  background-size: 220% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.empty-library {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: clamp(2.2rem, 7vw, 4.5rem) 1rem;
+}
+
+.empty-library div {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(81, 110, 214, .12);
+  color: #516ED6;
+  margin-bottom: 1rem;
+}
+
+.empty-library h2 {
+  margin: 0;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.5rem;
+}
+
+.empty-library p {
+  margin: .5rem 0 1.25rem;
+  color: rgba(35, 28, 30, .66);
+}
+
+.story-card {
+  overflow: hidden;
+}
+
+.story-card-body {
+  width: 100%;
+  display: block;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 1.1rem;
+  text-align: left;
+  font: inherit;
+}
+
+.story-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: .9rem;
+}
+
+.story-book-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(81, 110, 214, .12);
+  color: #516ED6;
+}
+
+.story-time {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  color: rgba(35, 28, 30, .48);
+  font-size: .72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.story-card h2 {
+  margin: 0 0 .4rem;
+  color: #231C1E;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: 1.16rem;
+  line-height: 1.18;
+}
+
+.story-card p {
+  margin: 0 0 .9rem;
+  color: rgba(35, 28, 30, .62);
+  font-size: .82rem;
+}
+
+.story-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.story-tags span {
+  border-radius: 999px;
+  background: rgba(248, 191, 64, .2);
+  color: #231C1E;
+  padding: .24rem .55rem;
+  font-size: .7rem;
+  font-weight: 800;
+}
+
+.story-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(35, 28, 30, .08);
+}
+
+.story-actions button {
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .3rem;
+  border: 0;
+  border-right: 1px solid rgba(35, 28, 30, .08);
+  background: transparent;
+  color: rgba(35, 28, 30, .7);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.story-actions button:first-child {
+  color: #516ED6;
+}
+
+.story-actions button:nth-child(2) {
+  color: #231C1E;
+}
+
+.story-actions button:last-child {
+  border-right: 0;
+  color: #EB315C;
+}
+
+.reader-nav {
+  position: sticky;
+}
+
+.reader-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  color: #516ED6;
+  font-size: .86rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.reader-main {
+  width: min(100% - 2rem, 740px);
+  margin: 0 auto;
+  padding: clamp(1.5rem, 5vw, 3rem) 0;
+}
+
+.story-label {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  border-radius: 999px;
+  background: rgba(81, 110, 214, .1);
+  color: #516ED6;
+  padding: .38rem .7rem;
+  font-size: .78rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.reader-main h1 {
+  margin: 0 0 1.5rem;
+  color: #231C1E;
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  line-height: 1.08;
+}
+
+.reader-card {
+  padding: clamp(1.25rem, 4vw, 2.25rem);
+}
+
+.reader-card p {
+  margin: 0 0 1rem;
+  color: rgba(35, 28, 30, .86);
+  font-size: clamp(1rem, 2.4vw, 1.08rem);
+  line-height: 1.9;
+}
+
+.reader-card p:last-child {
+  margin-bottom: 0;
+}
+
+.reader-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 1.2rem;
+}
+
+.reader-actions a {
+  text-decoration: none;
+}
+
+.story-loading,
+.print-loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: #F3F5ED;
+  color: rgba(35, 28, 30, .66);
+  text-align: center;
+}
+
+.story-loading svg {
+  color: #EB315C;
+  margin: 0 auto .75rem;
+}
+
+.story-loading a {
+  color: #516ED6;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  .library-nav {
+    min-height: 58px;
+    padding: 0 .8rem;
+  }
+
+  .library-nav-actions {
+    gap: .4rem;
+  }
+
+  .storimini-button.small,
+  .secondary-button.small {
+    min-height: 36px;
+    padding: .5rem .6rem;
+    font-size: .78rem;
+  }
+
+  .library-main,
+  .reader-main {
+    width: min(100% - 1rem, 1040px);
+    padding-top: 1rem;
+  }
+
+  .story-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .story-card-body {
+    padding: 1rem;
+  }
+
+  .reader-card {
+    box-shadow: none;
+  }
+
+  .reader-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .reader-actions > * {
+    width: 100%;
+  }
+}

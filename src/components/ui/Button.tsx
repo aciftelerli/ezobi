@@ -19,17 +19,17 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-[#0EA5E9] text-white shadow-[0_2px_8px_rgba(14,165,233,0.35)] hover:bg-[#0284C7] hover:shadow-[0_4px_16px_rgba(14,165,233,0.45)]",
+    "bg-[#516ED6] text-white shadow-[0_2px_8px_rgba(81,110,214,0.35)] hover:bg-[#3F59B8] hover:shadow-[0_4px_16px_rgba(81,110,214,0.45)]",
   yellow:
-    "bg-[#FBBF24] text-amber-900 shadow-[0_2px_8px_rgba(251,191,36,0.35)] hover:bg-[#D97706]",
+    "bg-[#F8BF40] text-amber-900 shadow-[0_2px_8px_rgba(248,191,64,0.35)] hover:bg-[#E5A929]",
   coral:
-    "bg-[#F97316] text-white shadow-[0_2px_8px_rgba(249,115,22,0.35)] hover:bg-[#EA580C]",
+    "bg-[#EB315C] text-white shadow-[0_2px_8px_rgba(235,49,92,0.35)] hover:bg-[#C91F49]",
   ghost:
-    "bg-transparent text-neutral-700 border border-neutral-200 hover:border-[#0EA5E9] hover:text-[#0EA5E9] hover:bg-sky-50",
+    "bg-transparent text-neutral-700 border border-neutral-200 hover:border-[#516ED6] hover:text-[#516ED6] hover:bg-[#F3F5ED]",
   "ghost-blue":
-    "bg-sky-50 text-[#0284C7] border border-sky-200 hover:bg-sky-100",
+    "bg-[#F3F5ED] text-[#516ED6] border border-[#DCE4FF] hover:bg-[#DCE4FF]",
   link:
-    "bg-transparent text-[#0EA5E9] underline-offset-4 hover:underline p-0 shadow-none",
+    "bg-transparent text-[#516ED6] underline-offset-4 hover:underline p-0 shadow-none",
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -51,7 +51,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center font-semibold leading-none whitespace-nowrap select-none",
           "transition-all duration-[250ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0EA5E9] focus-visible:ring-offset-2",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#516ED6] focus-visible:ring-offset-2",
           variantClasses[variant],
           sizeClasses[size],
           isDisabled && "opacity-50 cursor-not-allowed pointer-events-none",
@@ -70,3 +70,4 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 export default Button;
+
