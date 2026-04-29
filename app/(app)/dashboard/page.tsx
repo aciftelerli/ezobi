@@ -45,6 +45,24 @@ export default function DashboardPage() {
       if (!user) { router.push("/login"); return; }
       setUserName(user.user_metadata?.full_name?.split(" ")[0] || "");
       setNow(Date.now());
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("elevenlabs_voice_id, elevenlabs_voice_name")
+        .eq("id", user.id)
+        .single();
+      if (profile?.elevenlabs_voice_id) {
+        localStorage.setItem("storimini_voice_id", profile.elevenlabs_voice_id);
+        localStorage.setItem("storimini_voice_name", profile.elevenlabs_voice_name || "Kendi sesim");
+        localStorage.setItem("storimini_selected_voice_id", profile.elevenlabs_voice_id);
+        window.dispatchEvent(
+          new CustomEvent("storimini-voice-updated", {
+            detail: {
+              voiceId: profile.elevenlabs_voice_id,
+              voiceName: profile.elevenlabs_voice_name || "Kendi sesim",
+            },
+          })
+        );
+      }
       const { data } = await supabase
         .from("stories")
         .select("id, title, child_name, lesson, created_at, interests, content")

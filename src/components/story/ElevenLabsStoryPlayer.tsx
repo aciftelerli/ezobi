@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Download, Loader2, Mic2, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
 import { DEFAULT_STORY_VOICE_ID, STORY_VOICE_OPTIONS } from "@/lib/elevenlabs/voices";
 import toast from "react-hot-toast";
+import { createClient } from "@/lib/supabase/client";
 
 interface ElevenLabsStoryPlayerProps {
   title: string;
@@ -37,6 +38,29 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
     const timer = window.setTimeout(() => {
       syncCustomVoice();
     }, 0);
+
+    async function syncProfileVoice() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("elevenlabs_voice_id, elevenlabs_voice_name")
+        .eq("id", user.id)
+        .single();
+
+      if (!data?.elevenlabs_voice_id) return;
+      const voiceName = data.elevenlabs_voice_name || "Kendi sesim";
+      localStorage.setItem("storimini_voice_id", data.elevenlabs_voice_id);
+      localStorage.setItem("storimini_voice_name", voiceName);
+      localStorage.setItem("storimini_selected_voice_id", data.elevenlabs_voice_id);
+      setCustomVoiceId(data.elevenlabs_voice_id);
+      setCustomVoiceName(voiceName);
+      setSelectedVoiceId(data.elevenlabs_voice_id);
+    }
+
+    syncProfileVoice();
     window.addEventListener("storimini-voice-updated", syncCustomVoice);
 
     return () => {

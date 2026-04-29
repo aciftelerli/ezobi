@@ -15,6 +15,8 @@ export interface Database {
           email:      string | null;
           full_name:  string | null;
           avatar_url: string | null;
+          elevenlabs_voice_id: string | null;
+          elevenlabs_voice_name: string | null;
           credits:    number;
           plan:       string;
           created_at: string;
@@ -24,6 +26,8 @@ export interface Database {
           email?:      string | null;
           full_name?:  string | null;
           avatar_url?: string | null;
+          elevenlabs_voice_id?: string | null;
+          elevenlabs_voice_name?: string | null;
           credits?:    number;
           plan?:       string;
           created_at?: string;
@@ -32,6 +36,8 @@ export interface Database {
           email?:      string | null;
           full_name?:  string | null;
           avatar_url?: string | null;
+          elevenlabs_voice_id?: string | null;
+          elevenlabs_voice_name?: string | null;
           credits?:    number;
           plan?:       string;
         };

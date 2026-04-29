@@ -1,6 +1,7 @@
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 
 const ELEVENLABS_ADD_VOICE_URL = "https://api.elevenlabs.io/v1/voices/add";
 const MAX_SAMPLE_SIZE = 25 * 1024 * 1024;
@@ -20,6 +21,8 @@ export async function POST(req: NextRequest) {
     const incomingForm = await req.formData();
     const file = incomingForm.get("file");
     const name = incomingForm.get("name");
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
     if (!(file instanceof File)) {
       return NextResponse.json({ error: "Ses dosyası bulunamadı." }, { status: 400 });
@@ -64,8 +67,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (user?.id && result?.voice_id) {
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          elevenlabs_voice_id: result.voice_id,
+          elevenlabs_voice_name: voiceName,
+        })
+        .eq("id", user.id);
+
+      if (profileError) {
+        console.error("Supabase voice profile update error:", profileError.message);
+      }
+    }
+
     return NextResponse.json({
       voiceId: result?.voice_id,
+      voiceName,
       requiresVerification: Boolean(result?.requires_verification),
     });
   } catch (err: unknown) {
