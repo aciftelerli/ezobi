@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Download, Loader2, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
+import { Download, Loader2, Mic2, Pause, Play, RotateCcw, Volume2 } from "lucide-react";
+import { DEFAULT_STORY_VOICE_ID, STORY_VOICE_OPTIONS } from "@/lib/elevenlabs/voices";
 import toast from "react-hot-toast";
 
 interface ElevenLabsStoryPlayerProps {
@@ -19,9 +20,19 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [selectedVoiceId, setSelectedVoiceId] = useState(DEFAULT_STORY_VOICE_ID);
+  const [customVoiceId, setCustomVoiceId] = useState<string | null>(null);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const savedCustomVoiceId = localStorage.getItem("storimini_voice_id");
+      const savedSelectedVoiceId = localStorage.getItem("storimini_selected_voice_id");
+      setCustomVoiceId(savedCustomVoiceId);
+      setSelectedVoiceId(savedSelectedVoiceId || savedCustomVoiceId || DEFAULT_STORY_VOICE_ID);
+    }, 0);
+
     return () => {
+      window.clearTimeout(timer);
       if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     };
   }, []);
@@ -37,7 +48,7 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
         body: JSON.stringify({
           title,
           text: content,
-          voiceId: localStorage.getItem("storimini_voice_id") ?? undefined,
+          voiceId: selectedVoiceId,
         }),
       });
 
@@ -61,6 +72,20 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
       const message = error instanceof Error ? error.message : "Ses üretilemedi.";
       setStatus("error");
       toast.error(message, { id: "story-audio" });
+    }
+  }
+
+  function handleVoiceChange(voiceId: string) {
+    setSelectedVoiceId(voiceId);
+    localStorage.setItem("storimini_selected_voice_id", voiceId);
+    if (audioRef.current) audioRef.current.pause();
+    setAudioUrl(null);
+    setCurrentTime(0);
+    setDuration(0);
+    setStatus("idle");
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
     }
   }
 
@@ -126,6 +151,20 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
                     : "Yeni"}
         </span>
       </div>
+
+      <label className="elevenlabs-voice-select">
+        <span>
+          <Mic2 size={14} /> Masal sesi
+        </span>
+        <select value={selectedVoiceId} onChange={(event) => handleVoiceChange(event.target.value)} disabled={status === "loading"}>
+          {customVoiceId && <option value={customVoiceId}>Kendi sesim</option>}
+          {STORY_VOICE_OPTIONS.map((voice) => (
+            <option key={voice.id} value={voice.id}>
+              {voice.label} - {voice.description}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <audio
         ref={audioRef}

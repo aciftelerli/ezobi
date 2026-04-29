@@ -82,6 +82,7 @@ export default function DashboardPage() {
       if (!result?.voiceId) throw new Error("ElevenLabs voice id dönmedi.");
 
       localStorage.setItem("storimini_voice_id", result.voiceId);
+      localStorage.setItem("storimini_selected_voice_id", result.voiceId);
       toast.success(
         result.requiresVerification
           ? "Ses yüklendi. ElevenLabs doğrulama isteyebilir."

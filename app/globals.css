@@ -2316,3 +2316,34 @@ textarea.wizard-input {
   }
 }
 
+.elevenlabs-voice-select {
+  display: grid;
+  gap: .4rem;
+  color: rgba(35, 28, 30, .64);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.elevenlabs-voice-select span {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+
+.elevenlabs-voice-select select {
+  width: 100%;
+  min-height: 42px;
+  border: 1.5px solid rgba(35, 28, 30, .12);
+  border-radius: 8px;
+  background: #fff;
+  color: #231C1E;
+  font: inherit;
+  font-size: .86rem;
+  outline: none;
+  padding: .55rem .75rem;
+}
+
+.elevenlabs-voice-select select:focus {
+  border-color: #516ED6;
+  box-shadow: 0 0 0 3px rgba(81, 110, 214, .14);
+}
