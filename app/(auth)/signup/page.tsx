@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Lock, Mail, UserRound } from "lucide-react";
 import toast from "react-hot-toast";
 import { createClient } from "@/lib/supabase/client";
 
@@ -17,9 +17,10 @@ export default function SignupPage() {
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
-    if (!fullName.trim()) { toast.error("Adin gerekli."); return; }
+    if (!fullName.trim()) { toast.error("Adın gerekli."); return; }
     if (!email) { toast.error("Email gerekli."); return; }
-    if (password.length < 6) { toast.error("Sifre en az 6 karakter olmali."); return; }
+    if (password.length < 6) { toast.error("Şifre en az 6 karakter olmalı."); return; }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signUp({
@@ -39,121 +40,47 @@ export default function SignupPage() {
 
   if (done) {
     return (
-      <div style={{ textAlign: "center", padding: "2rem" }}>
-        <div style={{
-          width: 68, height: 68, borderRadius: "50%", background: "#D1FAE5",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          margin: "0 auto 1.5rem"
-        }}>
-          <Check size={30} color="#10B981" strokeWidth={2.5} />
-        </div>
-        <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0A0A0A", marginBottom: "0.75rem" }}>
-          Emailini dogrula
-        </h2>
-        <p style={{ color: "#737373", lineHeight: 1.7 }}>
-          <strong>{email}</strong> adresine dogrulama linki gonderdik.
-        </p>
+      <div className="auth-success">
+        <div className="auth-success-icon"><Check size={28} /></div>
+        <h1>Emailini doğrula</h1>
+        <p><strong>{email}</strong> adresine doğrulama linki gönderdik.</p>
       </div>
     );
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-      <div style={{ marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "1.875rem", fontWeight: 800, color: "#0A0A0A", marginBottom: "0.5rem" }}>
-          Hesap olustur
-        </h1>
-        <p style={{ fontSize: "0.9rem", color: "#737373" }}>
-          3 masal kredisi ucretsiz. Kredi karti gerekmez.
-        </p>
+    <motion.div className="auth-panel-inner" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+      <div className="auth-heading">
+        <p className="auth-kicker dark">İlk 3 masal ücretsiz</p>
+        <h1>Üye ol</h1>
+        <p>Çocuğuna özel ilk masalı oluşturmak için hesabını aç.</p>
       </div>
 
-      <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-        <div>
-          <label style={{ display: "block", fontWeight: 600, fontSize: "0.875rem", color: "#0A0A0A", marginBottom: "0.5rem" }}>
-            Adin
-          </label>
-          <input
-            type="text"
-            value={fullName}
-            onChange={e => setFullName(e.target.value)}
-            placeholder="Adin Soyadın"
-            style={{
-              width: "100%", padding: "12px 14px",
-              border: "1.5px solid #E5E5E5", borderRadius: 10,
-              fontSize: "0.9375rem", outline: "none",
-              fontFamily: "inherit", boxSizing: "border-box", color: "#0A0A0A"
-            }}
-            onFocus={e => { e.target.style.borderColor = "#0EA5E9"; e.target.style.boxShadow = "0 0 0 3px rgba(14,165,233,0.1)"; }}
-            onBlur={e => { e.target.style.borderColor = "#E5E5E5"; e.target.style.boxShadow = "none"; }}
-          />
+      <form onSubmit={handleSignup} className="auth-form">
+        <label className="field-label" htmlFor="fullName">Adın</label>
+        <div className="input-wrap">
+          <UserRound size={16} aria-hidden="true" />
+          <input id="fullName" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Adın Soyadın" autoComplete="name" />
         </div>
 
-        <div>
-          <label style={{ display: "block", fontWeight: 600, fontSize: "0.875rem", color: "#0A0A0A", marginBottom: "0.5rem" }}>
-            Email adresi
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="ornek@email.com"
-            style={{
-              width: "100%", padding: "12px 14px",
-              border: "1.5px solid #E5E5E5", borderRadius: 10,
-              fontSize: "0.9375rem", outline: "none",
-              fontFamily: "inherit", boxSizing: "border-box", color: "#0A0A0A"
-            }}
-            onFocus={e => { e.target.style.borderColor = "#0EA5E9"; e.target.style.boxShadow = "0 0 0 3px rgba(14,165,233,0.1)"; }}
-            onBlur={e => { e.target.style.borderColor = "#E5E5E5"; e.target.style.boxShadow = "none"; }}
-          />
+        <label className="field-label" htmlFor="signupEmail">Email adresi</label>
+        <div className="input-wrap">
+          <Mail size={16} aria-hidden="true" />
+          <input id="signupEmail" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@email.com" autoComplete="email" />
         </div>
 
-        <div>
-          <label style={{ display: "block", fontWeight: 600, fontSize: "0.875rem", color: "#0A0A0A", marginBottom: "0.5rem" }}>
-            Sifre
-          </label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="En az 6 karakter"
-            style={{
-              width: "100%", padding: "12px 14px",
-              border: "1.5px solid #E5E5E5", borderRadius: 10,
-              fontSize: "0.9375rem", outline: "none",
-              fontFamily: "inherit", boxSizing: "border-box", color: "#0A0A0A"
-            }}
-            onFocus={e => { e.target.style.borderColor = "#0EA5E9"; e.target.style.boxShadow = "0 0 0 3px rgba(14,165,233,0.1)"; }}
-            onBlur={e => { e.target.style.borderColor = "#E5E5E5"; e.target.style.boxShadow = "none"; }}
-          />
+        <label className="field-label" htmlFor="signupPassword">Şifre</label>
+        <div className="input-wrap">
+          <Lock size={16} aria-hidden="true" />
+          <input id="signupPassword" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="En az 6 karakter" autoComplete="new-password" />
         </div>
 
-        <motion.button
-          type="submit"
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.98 }}
-          disabled={loading}
-          style={{
-            width: "100%", display: "flex", alignItems: "center",
-            justifyContent: "center", gap: 8, padding: "13px",
-            borderRadius: 12, border: "none", fontFamily: "inherit",
-            background: loading ? "#7DD3FC" : "#0EA5E9",
-            color: "white", fontSize: "0.9375rem", fontWeight: 700,
-            cursor: loading ? "not-allowed" : "pointer",
-            boxShadow: "0 2px 12px rgba(14,165,233,0.35)"
-          }}
-        >
-          {loading ? "Hesap olusturuluyor..." : <><span>Ucretsiz Basla</span><ArrowRight size={16} /></>}
+        <motion.button className="storimini-button full" type="submit" whileTap={{ scale: 0.98 }} disabled={loading}>
+          {loading ? "Hesap oluşturuluyor..." : <><span>Ücretsiz Başla</span><ArrowRight size={16} /></>}
         </motion.button>
       </form>
 
-      <p style={{ textAlign: "center", marginTop: "1.5rem", fontSize: "0.875rem", color: "#737373" }}>
-        Zaten hesabin var mi?{" "}
-        <Link href="/login" style={{ color: "#0EA5E9", fontWeight: 700, textDecoration: "none" }}>
-          Giris yap
-        </Link>
-      </p>
+      <p className="auth-switch">Zaten hesabın var mı? <Link href="/login">Giriş yap</Link></p>
     </motion.div>
   );
 }
