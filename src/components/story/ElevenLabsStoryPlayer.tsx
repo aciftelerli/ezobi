@@ -22,17 +22,26 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
   const [playbackRate, setPlaybackRate] = useState(1);
   const [selectedVoiceId, setSelectedVoiceId] = useState(DEFAULT_STORY_VOICE_ID);
   const [customVoiceId, setCustomVoiceId] = useState<string | null>(null);
+  const [customVoiceName, setCustomVoiceName] = useState("Kendi sesim");
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
+    function syncCustomVoice() {
       const savedCustomVoiceId = localStorage.getItem("storimini_voice_id");
+      const savedCustomVoiceName = localStorage.getItem("storimini_voice_name");
       const savedSelectedVoiceId = localStorage.getItem("storimini_selected_voice_id");
       setCustomVoiceId(savedCustomVoiceId);
+      setCustomVoiceName(savedCustomVoiceName || "Kendi sesim");
       setSelectedVoiceId(savedSelectedVoiceId || savedCustomVoiceId || DEFAULT_STORY_VOICE_ID);
+    }
+
+    const timer = window.setTimeout(() => {
+      syncCustomVoice();
     }, 0);
+    window.addEventListener("storimini-voice-updated", syncCustomVoice);
 
     return () => {
       window.clearTimeout(timer);
+      window.removeEventListener("storimini-voice-updated", syncCustomVoice);
       if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     };
   }, []);
@@ -157,7 +166,7 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
           <Mic2 size={14} /> Masal sesi
         </span>
         <select value={selectedVoiceId} onChange={(event) => handleVoiceChange(event.target.value)} disabled={status === "loading"}>
-          {customVoiceId && <option value={customVoiceId}>Kendi sesim</option>}
+          {customVoiceId && <option value={customVoiceId}>{customVoiceName}</option>}
           {STORY_VOICE_OPTIONS.map((voice) => (
             <option key={voice.id} value={voice.id}>
               {voice.label} - {voice.description}
