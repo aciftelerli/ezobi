@@ -21,7 +21,6 @@ export default function StoryPage() {
 
   useEffect(() => {
     async function load() {
-      // Önce localStorage'a bak (yeni oluşturulan masal)
       const cached = localStorage.getItem("ezobi_story");
       if (cached) {
         try {
@@ -37,40 +36,38 @@ export default function StoryPage() {
           }
         } catch {}
       }
-
-      // localStorage yoksa Supabase'den çek
       const { data } = await supabase
         .from("stories")
         .select("title, content, child_name")
         .eq("id", id)
         .single();
-
       setStory(data);
       setLoading(false);
     }
     if (id) load();
   }, [id]);
 
-  if (loading) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Poppins', sans-serif" }}>
-      <div style={{ textAlign: "center" }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-          style={{ width: 40, height: 40, margin: "0 auto 1rem" }}>
-          <Sparkles size={40} color="#0EA5E9" />
-        </motion.div>
-        <p style={{ color: "#737373", fontWeight: 500 }}>Masal yükleniyor...</p>
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Poppins', sans-serif" }}>
+        <div style={{ textAlign: "center" }}>
+          <Sparkles size={40} color="#0EA5E9" style={{ margin: "0 auto 1rem" }} />
+          <p style={{ color: "#737373", fontWeight: 500 }}>Masal yukleniyor...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
-  if (!story) return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Poppins', sans-serif", flexDirection: "column", gap: 16 }}>
-      <p style={{ color: "#737373", fontWeight: 500 }}>Masal bulunamadı.</p>
-      <Link href="/dashboard" style={{ color: "#0EA5E9", fontWeight: 600, textDecoration: "none" }}>
-        Dashboard'a dön
-      </Link>
-    </div>
-  );
+  if (!story) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Poppins', sans-serif", flexDirection: "column", gap: 16 }}>
+        <p style={{ color: "#737373", fontWeight: 500 }}>Masal bulunamadi.</p>
+        <Link href="/dashboard" style={{ color: "#0EA5E9", fontWeight: 600, textDecoration: "none" }}>
+          Dashboard a don
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAFA", fontFamily: "'Poppins', system-ui, sans-serif" }}>
@@ -88,9 +85,8 @@ export default function StoryPage() {
 
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "3rem 1.5rem" }}>
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "4px 12px", borderRadius: 999, background: "#E0F2FE", color: "#0284C7", fontSize: "0.78rem", fontWeight: 600, marginBottom: "1.25rem" }}>
-            <Sparkles size={11} /> {story.child_name} için özel masal
+            <Sparkles size={11} /> {story.child_name} icin ozel masal
           </div>
 
           <h1 style={{ fontSize: "clamp(1.75rem,4vw,2.5rem)", fontWeight: 800, color: "#0A0A0A", letterSpacing: "-0.025em", lineHeight: 1.2, marginBottom: "2.5rem" }}>
@@ -107,10 +103,25 @@ export default function StoryPage() {
 
           <div style={{ display: "flex", gap: 12, marginTop: "2rem", flexWrap: "wrap" }}>
             <Link href="/wizard" style={{ textDecoration: "none" }}>
-              <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-                style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, border: "none", background: "#0EA5E9", color: "white", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                <Sparkles size={16} /> Yeni Masal Oluştur
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.97 }}
+                style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, border: "none", background: "#0EA5E9", color: "white", fontSize: "0.9rem", fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}
+              >
+                <Sparkles size={16} /> Yeni Masal Olustur
               </motion.button>
             </Link>
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              onClick={() => windo
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => window.print()}
+              style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 24px", borderRadius: 12, border: "1.5px solid #E5E5E5", background: "white", color: "#525252", fontSize: "0.9rem", fontWeight: 600, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              <Download size={16} /> Yazdir / PDF
+            </motion.button>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}
