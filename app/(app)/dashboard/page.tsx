@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { BookOpen, Plus, Sparkles, LogOut, Clock } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, Plus, Sparkles, LogOut, Clock, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import toast from "react-hot-toast";
 
 interface Story {
   id: string;
@@ -14,6 +15,7 @@ interface Story {
   lesson: string;
   created_at: string;
   interests: string[];
+  content: string;
 }
 
 export default function DashboardPage() {
@@ -22,25 +24,99 @@ export default function DashboardPage() {
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
-
       setUserName(user.user_metadata?.full_name?.split(" ")[0] || "");
-
       const { data } = await supabase
         .from("stories")
-        .select("id, title, child_name, lesson, created_at, interests")
+        .select("id, title, child_name, lesson, created_at, interests, content")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-
       setStories(data ?? []);
       setLoading(false);
     }
     load();
   }, []);
+
+  async function handleDelete(id: string) {
+    setDeletingId(id);
+    const { error } = await supabase.from("stories").delete().eq("id", id);
+    if (error) {
+      toast.error("Silinemedi.");
+      setDeletingId(null);
+      return;
+    }
+    setStories(prev => prev.filter(s => s.id !== id));
+    setDeletingId(null);
+    toast.success("Masal silindi.");
+  }
+
+  async function handleDownloadPDF(story: Story) {
+    toast.loading("PDF hazırlanıyor...", { id: "pdf" });
+    try {
+      const { default: jsPDF } = await import("jspdf");
+      const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+
+      const pageWidth = 210;
+      const margin = 20;
+      const maxWidth = pageWidth - margin * 2;
+      let y = 30;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(20);
+      const titleLines = doc.splitTextToSize(story.title, maxWidth);
+      doc.text(titleLines, margin, y);
+      y += titleLines.length * 10 + 8;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(120, 120, 120);
+      doc.text(`${story.child_name} icin ozel masal`, margin, y);
+      y += 12;
+
+      doc.setDrawColor(14, 165, 233);
+      doc.setLineWidth(0.5);
+      doc.line(margin, y, pageWidth - margin, y);
+      y += 10;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      doc.setTextColor(40, 40, 40);
+
+      const paragraphs = story.content.split("\n").filter(p => p.trim());
+      for (const para of paragraphs) {
+        const lines = doc.splitTextToSize(para, maxWidth);
+        if (y + lines.length * 7 > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(lines, margin, y);
+        y += lines.length * 7 + 5;
+      }
+
+      doc.setFontSize(9);
+      doc.setTextColor(180, 180, 180);
+      doc.text("ezobi.vercel.app", margin, 287);
+
+      doc.save(`${story.child_name}-masali.pdf`);
+      toast.success("PDF indirildi!", { id: "pdf" });
+    } catch {
+      toast.error("PDF oluşturulamadı.", { id: "pdf" });
+    }
+  }
+
+  function handleView(story: Story) {
+    localStorage.setItem("ezobi_story", JSON.stringify({
+      title: story.title,
+      content: story.content,
+      childName: story.child_name,
+    }));
+    router.push(`/story/${story.id}`);
+  }
 
   async function handleLogout() {
     await supabase.auth.signOut();
@@ -52,6 +128,7 @@ export default function DashboardPage() {
     const mins = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
+    if (mins < 2) return "az önce";
     if (mins < 60) return `${mins} dakika önce`;
     if (hours < 24) return `${hours} saat önce`;
     return `${days} gün önce`;
@@ -59,8 +136,7 @@ export default function DashboardPage() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#FAFAFA", fontFamily: "'Poppins', system-ui, sans-serif" }}>
-
-      <nav style={{ background: "white", borderBottom: "1px solid #F0F0F0", padding: "0 1.5rem", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <nav style={{ background: "white", borderBottom: "1px solid #F0F0F0", padding: "0 1.5rem", height: 64, display: "flex", alignItems: "center", justifyContent: "space-between", position: "sticky", top: 0, zIndex: 10 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 32, height: 32, borderRadius: 9, background: "linear-gradient(135deg,#0EA5E9,#F97316)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <BookOpen size={16} color="white" />
@@ -82,7 +158,7 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "3rem 1.5rem" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "3rem 1.5rem" }}>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
 
           <div style={{ marginBottom: "2.5rem" }}>
@@ -90,14 +166,14 @@ export default function DashboardPage() {
               {userName ? `Merhaba, ${userName}!` : "Masallarım"}
             </h1>
             <p style={{ color: "#737373", fontSize: "0.9rem" }}>
-              {stories.length > 0 ? `${stories.length} masal oluşturdun.` : "Henüz masal yok, ilkini oluştur!"}
+              {loading ? "Yükleniyor..." : stories.length > 0 ? `${stories.length} masal oluşturdun.` : "Henüz masal yok, ilkini oluştur!"}
             </p>
           </div>
 
           {loading ? (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: "1.25rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(290px,1fr))", gap: "1.25rem" }}>
               {[1,2,3].map(i => (
-                <div key={i} style={{ background: "#F0F0F0", borderRadius: 16, height: 160, animation: "pulse 1.5s infinite" }} />
+                <div key={i} style={{ background: "#F0F0F0", borderRadius: 16, height: 180, opacity: 0.5 }} />
               ))}
             </div>
           ) : stories.length === 0 ? (
@@ -119,47 +195,65 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(280px,1fr))", gap: "1.25rem" }}>
-              {stories.map((story, i) => (
-                <motion.div key={story.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: i * 0.08 }}
-                  whileHover={{ y: -4, boxShadow: "0 12px 32px rgba(0,0,0,0.1)" }}
-                  onClick={() => {
-                    localStorage.setItem("ezobi_story", JSON.stringify({
-                      title: story.title,
-                      content: "",
-                      childName: story.child_name,
-                    }));
-                    router.push(`/story/${story.id}`);
-                  }}
-                  style={{ background: "white", borderRadius: 16, padding: "1.5rem", border: "1px solid #F0F0F0", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", cursor: "pointer", transition: "all 0.25s" }}>
-                  <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1rem" }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 11, background: "linear-gradient(135deg,#E0F2FE,#BAE6FD)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <BookOpen size={18} color="#0EA5E9" />
+            <AnimatePresence>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(290px,1fr))", gap: "1.25rem" }}>
+                {stories.map((story, i) => (
+                  <motion.div key={story.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.35, delay: i * 0.06 }}
+                    style={{ background: "white", borderRadius: 18, border: "1px solid #F0F0F0", boxShadow: "0 2px 10px rgba(0,0,0,0.05)", overflow: "hidden" }}>
+
+                    {/* Kart üst kısım */}
+                    <div style={{ padding: "1.5rem 1.5rem 1rem", cursor: "pointer" }} onClick={() => handleView(story)}>
+                      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: "1rem" }}>
+                        <div style={{ width: 42, height: 42, borderRadius: 12, background: "linear-gradient(135deg,#E0F2FE,#BAE6FD)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                          <BookOpen size={19} color="#0EA5E9" />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.72rem", color: "#A3A3A3", fontWeight: 500 }}>
+                          <Clock size={11} />
+                          {timeAgo(story.created_at)}
+                        </div>
+                      </div>
+                      <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#0A0A0A", marginBottom: "0.4rem", lineHeight: 1.4 }}>
+                        {story.title || `${story.child_name}'in Masalı`}
+                      </h3>
+                      <p style={{ fontSize: "0.8rem", color: "#737373", marginBottom: "1rem" }}>
+                        {story.child_name} için · {story.lesson}
+                      </p>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                        {story.interests?.slice(0, 2).map(interest => (
+                          <span key={interest} style={{ fontSize: "0.7rem", fontWeight: 600, padding: "3px 8px", borderRadius: 999, background: "#F0F9FF", color: "#0284C7" }}>
+                            {interest}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: "0.75rem", color: "#A3A3A3", fontWeight: 500 }}>
-                      <Clock size={11} />
-                      {timeAgo(story.created_at)}
+
+                    {/* Kart alt aksiyon çubuğu */}
+                    <div style={{ borderTop: "1px solid #F5F5F5", display: "flex" }}>
+                      <button
+                        onClick={() => handleView(story)}
+                        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "10px", background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: "#0EA5E9", fontFamily: "inherit", borderRight: "1px solid #F5F5F5" }}>
+                        <Eye size={13} /> Oku
+                      </button>
+                      <button
+                        onClick={() => handleDownloadPDF(story)}
+                        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "10px", background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: "#10B981", fontFamily: "inherit", borderRight: "1px solid #F5F5F5" }}>
+                        PDF
+                      </button>
+                      <button
+                        onClick={() => handleDelete(story.id)}
+                        disabled={deletingId === story.id}
+                        style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "10px", background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: "#EF4444", fontFamily: "inherit", opacity: deletingId === story.id ? 0.5 : 1 }}>
+                        <Trash2 size={13} /> Sil
+                      </button>
                     </div>
-                  </div>
-                  <h3 style={{ fontSize: "0.9375rem", fontWeight: 700, color: "#0A0A0A", marginBottom: "0.4rem", lineHeight: 1.4 }}>
-                    {story.title || `${story.child_name}'in Masalı`}
-                  </h3>
-                  <p style={{ fontSize: "0.8rem", color: "#737373", marginBottom: "1rem" }}>
-                    {story.child_name} için · {story.lesson}
-                  </p>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {story.interests?.slice(0, 2).map(interest => (
-                      <span key={interest} style={{ fontSize: "0.72rem", fontWeight: 600, padding: "3px 8px", borderRadius: 999, background: "#F0F9FF", color: "#0284C7" }}>
-                        {interest}
-                      </span>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+                  </motion.div>
+                ))}
+              </div>
+            </AnimatePresence>
           )}
         </motion.div>
       </div>
