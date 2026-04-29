@@ -66,10 +66,14 @@ async function handleGenerate() {
   setLoading(true);
   toast.loading("Masal yaziliyor...", { id: "generate" });
   try {
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
     const res = await fetch("/api/story/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, userId: user?.id }),
     });
     if (!res.ok) throw new Error("Hata");
     const result = await res.json();

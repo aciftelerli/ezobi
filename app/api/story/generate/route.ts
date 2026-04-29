@@ -2,13 +2,19 @@ export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { createClient } from "@supabase/supabase-js";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { childName, age, interests, fears, lesson, extraNote } = body;
+    const { childName, age, interests, fears, lesson, extraNote, userId } = body;
 
     if (!childName || !interests?.length || !lesson) {
       return NextResponse.json({ error: "Eksik bilgi." }, { status: 400 });
@@ -28,6 +34,20 @@ export async function POST(req: NextRequest) {
     const title = titleMatch ? titleMatch[1].trim() : `${childName}'in Masalı`;
     const content = raw.replace(/BAŞLIK:\s*.+\n?/, "").trim();
     const storyId = crypto.randomUUID();
+
+    if (userId) {
+      await supabase.from("stories").insert({
+        id: storyId,
+        user_id: userId,
+        child_name: childName,
+        interests,
+        fears: fears ?? [],
+        lesson,
+        title,
+        content,
+        status: "done",
+      });
+    }
 
     return NextResponse.json({ id: storyId, title, content, childName });
 
