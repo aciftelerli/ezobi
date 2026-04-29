@@ -9,9 +9,9 @@ const DEFAULT_OUTPUT_FORMAT = "mp3_44100_128";
 export async function POST(req: NextRequest) {
   try {
     const apiKey = process.env.ELEVENLABS_API_KEY;
-    const voiceId = process.env.ELEVENLABS_VOICE_ID;
+    const defaultVoiceId = process.env.ELEVENLABS_VOICE_ID;
 
-    if (!apiKey || !voiceId) {
+    if (!apiKey || !defaultVoiceId) {
       return NextResponse.json(
         { error: "ElevenLabs ayarları eksik. ELEVENLABS_API_KEY ve ELEVENLABS_VOICE_ID gerekli." },
         { status: 500 }
@@ -21,6 +21,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const text = typeof body.text === "string" ? body.text.trim() : "";
     const title = typeof body.title === "string" ? body.title.trim() : "";
+    const requestedVoiceId = typeof body.voiceId === "string" ? body.voiceId.trim() : "";
+    const voiceId = requestedVoiceId || defaultVoiceId;
 
     if (!text) {
       return NextResponse.json({ error: "Seslendirilecek metin bulunamadı." }, { status: 400 });

@@ -2254,3 +2254,65 @@ textarea.wizard-input {
     width: fit-content;
   }
 }
+.voice-upload-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.voice-upload-button {
+  color: #516ED6;
+}
+
+@media (max-width: 860px) {
+  .auth-shell {
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(81, 110, 214, .12), rgba(243, 245, 237, 0) 230px),
+      #F3F5ED;
+  }
+
+  .auth-form-panel {
+    gap: 0;
+  }
+
+  .auth-form-card {
+    width: min(100%, 420px);
+  }
+}
+
+@media (max-width: 720px) {
+  .library-nav {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+  }
+
+  .library-nav-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .library-nav-actions > * {
+    width: 100%;
+  }
+
+  .voice-upload-button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 860px) {
+  .auth-form-panel {
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 0;
+  }
+}
+

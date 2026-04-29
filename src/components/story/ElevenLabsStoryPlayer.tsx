@@ -34,7 +34,11 @@ export function ElevenLabsStoryPlayer({ title, content }: ElevenLabsStoryPlayerP
       const response = await fetch("/api/story/audio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, text: content }),
+        body: JSON.stringify({
+          title,
+          text: content,
+          voiceId: localStorage.getItem("storimini_voice_id") ?? undefined,
+        }),
       });
 
       if (!response.ok) {

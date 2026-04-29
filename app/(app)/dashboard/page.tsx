@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { BookOpen, Clock, Eye, LogOut, Plus, Sparkles, Trash2 } from "lucide-react";
+import { BookOpen, Clock, Eye, LogOut, Mic2, Plus, Sparkles, Trash2, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -31,10 +31,12 @@ function cacheStory(story: Story) {
 export default function DashboardPage() {
   const router = useRouter();
   const supabase = createClient();
+  const voiceInputRef = useRef<HTMLInputElement | null>(null);
   const [stories, setStories] = useState<Story[]>([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [voiceUploading, setVoiceUploading] = useState(false);
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -54,6 +56,46 @@ export default function DashboardPage() {
     load();
   }, [router, supabase]);
 
+
+  async function handleVoiceUpload(file: File | null) {
+    if (!file) return;
+    if (!file.type.startsWith("audio/")) {
+      toast.error("Lütfen bir ses dosyası seç.");
+      return;
+    }
+
+    setVoiceUploading(true);
+    toast.loading("Ses örneğin yükleniyor...", { id: "voice-upload" });
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("name", `${userName || "Storimini"} sesi`);
+
+      const response = await fetch("/api/voice/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(result?.error ?? "Ses yüklenemedi.");
+      if (!result?.voiceId) throw new Error("ElevenLabs voice id dönmedi.");
+
+      localStorage.setItem("storimini_voice_id", result.voiceId);
+      toast.success(
+        result.requiresVerification
+          ? "Ses yüklendi. ElevenLabs doğrulama isteyebilir."
+          : "Ses yüklendi, artık masallar bu sesle okunabilir.",
+        { id: "voice-upload" }
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Ses yüklenemedi.";
+      toast.error(message, { id: "voice-upload" });
+    } finally {
+      setVoiceUploading(false);
+      if (voiceInputRef.current) voiceInputRef.current.value = "";
+    }
+  }
   async function handleDelete(id: string) {
     setDeletingId(id);
     const { error } = await supabase.from("stories").delete().eq("id", id);
@@ -142,6 +184,22 @@ export default function DashboardPage() {
       <nav className="library-nav">
         <Link href="/" className="brand-wordmark" aria-label="Storimini ana sayfa">stori<span>mini</span></Link>
         <div className="library-nav-actions">
+          <input
+            ref={voiceInputRef}
+            className="voice-upload-input"
+            type="file"
+            accept="audio/*"
+            onChange={(event) => handleVoiceUpload(event.target.files?.[0] ?? null)}
+          />
+          <button
+            type="button"
+            className="secondary-button small voice-upload-button"
+            onClick={() => voiceInputRef.current?.click()}
+            disabled={voiceUploading}
+          >
+            {voiceUploading ? <UploadCloud size={14} /> : <Mic2 size={14} />}
+            {voiceUploading ? "Yükleniyor" : "Kendi Sesini Yükle"}
+          </button>
           <Link href="/wizard" className="storimini-button small"><Plus size={15} /> Yeni Masal</Link>
           <button type="button" className="secondary-button small" onClick={handleLogout}><LogOut size={14} /> Çıkış</button>
         </div>
@@ -195,5 +253,4 @@ export default function DashboardPage() {
     </div>
   );
 }
-
 
