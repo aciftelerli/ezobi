@@ -9,6 +9,8 @@ Küçük bir yıldız, gökyüzünde yolunu ararken cesur bir arkadaşla tanış
 Birlikte karanlıktan korkmamayı, paylaşmayı ve hayal kurmayı öğrendiler.
 Şimdi gözlerini kapat, derin bir nefes al ve masal başlasın.`;
 
+const ACCEPTED_VOICE_FILE_TYPES = "audio/*,video/mp4,.mp3,.wav,.m4a,.mp4,.webm,.ogg,.aac";
+
 interface VoiceStudioDialogProps {
   open: boolean;
   userName: string;
@@ -109,8 +111,13 @@ export function VoiceStudioDialog({ open, userName, onClose }: VoiceStudioDialog
 
   function handleFileSelect(file: File | null) {
     if (!file) return;
-    if (!file.type.startsWith("audio/")) {
-      toast.error("Lütfen ses dosyası seç.");
+    const isSupportedFile =
+      file.type.startsWith("audio/") ||
+      file.type === "video/mp4" ||
+      file.name.toLowerCase().match(/\.(mp3|wav|m4a|mp4|webm|ogg|aac)$/);
+
+    if (!isSupportedFile) {
+      toast.error("Lütfen MP3, WAV, M4A, MP4 veya benzeri bir ses dosyası seç.");
       return;
     }
     setSelectedFile(file);
@@ -242,7 +249,7 @@ export function VoiceStudioDialog({ open, userName, onClose }: VoiceStudioDialog
               ref={fileInputRef}
               className="voice-upload-input"
               type="file"
-              accept="audio/*"
+              accept={ACCEPTED_VOICE_FILE_TYPES}
               onChange={(event) => handleFileSelect(event.target.files?.[0] ?? null)}
             />
             <button type="button" className="voice-file-drop" onClick={() => fileInputRef.current?.click()}>

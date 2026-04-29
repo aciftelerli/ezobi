@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const ELEVENLABS_ADD_VOICE_URL = "https://api.elevenlabs.io/v1/voices/add";
 const MAX_SAMPLE_SIZE = 25 * 1024 * 1024;
+const SUPPORTED_AUDIO_EXTENSIONS = [".mp3", ".wav", ".m4a", ".mp4", ".webm", ".ogg", ".aac"];
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,8 +25,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Ses dosyası bulunamadı." }, { status: 400 });
     }
 
-    if (!file.type.startsWith("audio/")) {
-      return NextResponse.json({ error: "Lütfen bir ses dosyası yükle." }, { status: 400 });
+    const lowerFileName = file.name.toLowerCase();
+    const isSupportedFile =
+      file.type.startsWith("audio/") ||
+      file.type === "video/mp4" ||
+      SUPPORTED_AUDIO_EXTENSIONS.some((extension) => lowerFileName.endsWith(extension));
+
+    if (!isSupportedFile) {
+      return NextResponse.json(
+        { error: "Lütfen MP3, WAV, M4A, MP4 veya benzeri bir ses dosyası yükle." },
+        { status: 400 }
+      );
     }
 
     if (file.size > MAX_SAMPLE_SIZE) {
