@@ -1,5 +1,17 @@
 "use client";
 
+const printStyles = `
+  @media print {
+    nav, .no-print { display: none !important; }
+    body { background: white !important; }
+    .story-content {
+      max-width: 100% !important;
+      padding: 20px !important;
+    }
+    @page { margin: 15mm; size: A4; }
+  }
+`;
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
