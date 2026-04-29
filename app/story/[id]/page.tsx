@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Download, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { ElevenLabsStoryPlayer } from "@/components/story/ElevenLabsStoryPlayer";
 
 interface Story {
   title: string;
@@ -84,6 +85,7 @@ export default function StoryPage() {
         <motion.article initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .35 }}>
           <div className="story-label"><Sparkles size={12} /> {story.child_name} için özel masal</div>
           <h1>{story.title}</h1>
+          <ElevenLabsStoryPlayer title={story.title} content={story.content} />
           <div className="reader-card">
             {story.content.split("\n").filter((p) => p.trim()).map((paragraph, i) => (
               <p key={i}>{paragraph}</p>
@@ -98,3 +100,4 @@ export default function StoryPage() {
     </div>
   );
 }
+

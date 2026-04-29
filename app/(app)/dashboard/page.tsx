@@ -35,12 +35,14 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { router.push("/login"); return; }
       setUserName(user.user_metadata?.full_name?.split(" ")[0] || "");
+      setNow(Date.now());
       const { data } = await supabase
         .from("stories")
         .select("id, title, child_name, lesson, created_at, interests, content")
@@ -125,7 +127,7 @@ export default function DashboardPage() {
   }
 
   function timeAgo(dateStr: string) {
-    const diff = Date.now() - new Date(dateStr).getTime();
+    const diff = now - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
@@ -193,3 +195,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+

@@ -20,7 +20,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Eksik bilgi." }, { status: 400 });
     }
 
-    const prompt = `Türkçe kısa bir çocuk masalı yaz. Baş kahraman ${childName} (${age} yaş). İlgi alanı: ${interests[0]}. Ders: ${lesson}. Maksimum 300 kelime. Format: BAŞLIK: [başlık]\n\n[masal]`;
+    const extraContext = extraNote ? ` Ek not: ${extraNote}.` : "";
+    const prompt = `Türkçe kısa bir çocuk masalı yaz. Baş kahraman ${childName} (${age} yaş). İlgi alanı: ${interests[0]}. Ders: ${lesson}.${extraContext} Maksimum 300 kelime. Format: BAŞLIK: [başlık]\n\n[masal]`;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -57,3 +58,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
+
