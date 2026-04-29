@@ -239,7 +239,15 @@ export default function DashboardPage() {
                         <Eye size={13} /> Oku
                       </button>
                       <button
-                        onClick={() => handleDownloadPDF(story)}
+                        onClick={() => {
+                        localStorage.setItem("ezobi_story", JSON.stringify({
+                        title: story.title,
+                         content: story.content,
+                         childName: story.child_name,
+                          }));
+                        window.open(`/story/${story.id}/print`, "_blank");
+                        }}
+                        
                         style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "10px", background: "none", border: "none", cursor: "pointer", fontSize: "0.78rem", fontWeight: 600, color: "#10B981", fontFamily: "inherit", borderRight: "1px solid #F5F5F5" }}>
                         PDF
                       </button>
